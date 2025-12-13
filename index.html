@@ -14,7 +14,6 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            /* 🎨 NOUVEAU GRADIENT - Plus moderne et professionnel */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -259,7 +258,6 @@
                     <span class="error-message" id="emailError">Veuillez entrer un email valide</span>
                 </div>
 
-                <!-- 🔗 POLITIQUE DE CONFIDENTIALITÉ AMÉLIORÉE -->
                 <p class="privacy-notice">
                     🔒 Vos données sont protégées et ne seront jamais partagées. Vous pouvez vous désabonner à tout moment d'un simple clic. Nous respectons votre vie privée conformément au RGPD.
                 </p>
@@ -273,7 +271,6 @@
                     ✓ Protection anti-spam activée
                 </div>
 
-                <!-- 📝 TEXTE DU BOUTON OPTIMISÉ -->
                 <button type="submit" class="submit-btn" id="submitBtn">
                     S'abonner maintenant
                 </button>
@@ -291,7 +288,6 @@
         const submitBtn = document.getElementById('submitBtn');
         const successMessage = document.getElementById('successMessage');
 
-        // Validation en temps réel
         const inputs = document.querySelectorAll('input[type="text"], input[type="email"]');
         inputs.forEach(input => {
             input.addEventListener('blur', function() {
@@ -329,7 +325,6 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Valider tous les champs
             let isValid = true;
             inputs.forEach(input => {
                 if (!validateField(input)) {
@@ -339,21 +334,17 @@
 
             if (!isValid) return;
 
-            // Désactiver le bouton
             submitBtn.disabled = true;
             submitBtn.textContent = 'Inscription en cours...';
 
-            // Préparer les données
             const formData = {
                 nom: document.getElementById('nom').value.trim(),
                 prenom: document.getElementById('prenom').value.trim(),
-                email: document.getElementById('email').value.trim().toLowerCase(),
-                optin: document.getElementById('optin').checked
+                email: document.getElementById('email').value.trim().toLowerCase()
             };
 
             try {
-                // ✅ URL WEBHOOK N8N - DÉJÀ CONFIGURÉE
-                const response = await fetch('https://agentduperd.app.n8n.cloud/webhook-test/newsletter-suscribe', {
+                const response = await fetch('https://agentduperd.app.n8n.cloud/webhook/newsletter-subscribe', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -361,12 +352,12 @@
                     body: JSON.stringify(formData)
                 });
 
-                if (response.ok) {
-                    // Succès - Afficher le message et cacher le formulaire
+                const result = await response.json();
+
+                if (response.ok && result.success) {
                     form.style.display = 'none';
                     successMessage.classList.add('show');
                     
-                    // Optionnel : Tracking Google Analytics
                     if (typeof gtag !== 'undefined') {
                         gtag('event', 'newsletter_signup', {
                             'event_category': 'engagement',
@@ -374,17 +365,16 @@
                         });
                     }
                 } else {
-                    throw new Error('Erreur lors de l\'inscription');
+                    throw new Error(result.error || 'Erreur lors de l\'inscription');
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('❌ Une erreur est survenue. Veuillez réessayer dans quelques instants.');
+                alert('❌ ' + (error.message || 'Une erreur est survenue. Veuillez réessayer.'));
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'S\'abonner maintenant';
             }
         });
 
-        // Animation d'entrée au chargement de la page
         window.addEventListener('load', function() {
             document.querySelector('.container').style.opacity = '0';
             document.querySelector('.container').style.transform = 'translateY(20px)';
